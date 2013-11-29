@@ -76,7 +76,7 @@ def short_all_url(data, modifier, modifier_data, string):
 
     return new_message
 
-def tiny_url(url, buffer):
+def tiny_url(url):
     shortener = weechat.config_get_plugin('shortener')
     if shortener == 'isgd':
         url = ISGD % urlencode({'longurl':url})
