@@ -76,15 +76,17 @@ def outside_hook(data, modifier, modifier_data, string):
 
 def short_all_url(string, color):
     new_message = string
+    color = weechat.color(weechat.config_get_plugin("color"))
+    reset = weechat.color('reset')
     for url in urlRe.findall(string):
         if len(url) > int(weechat.config_get_plugin('urllength')) and not ignore_url(url):
             short_url = tiny_url(url)
             if color:
-                color = weechat.color(weechat.config_get_plugin("color"))
-                reset = weechat.color('reset')
                 new_message = new_message.replace(url, '%s%s%s' % (color, short_url, reset))
             else:
                 new_message = new_message.replace(url, short_url)
+        elif color:
+            new_message = new_message.replace(url, '%s%s%s' % (color, url, reset))
 
     return new_message
 
