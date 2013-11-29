@@ -1,4 +1,4 @@
-# Copyright (c) 2013 by Steeve Chailloux <steevechailloux@gmail.com>
+# Copyright (c) 2010 by John Anderson <sontek@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,6 +12,17 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# History
+# 2011-10-24, Dmitry Geurkov <dmitry_627@mail.ru>
+#   version 0.4.1: added: option "ignore_list" for a blacklist of shorten urls.
+# 2011-01-17, nils_2 <weechatter@arcor.de>
+#   version 0.4: URI will be shorten in /query, too.
+#              : added: option "short_own".
+# 2010-11-08, John Anderson <sontek@gmail.com>:
+#   version 0.3: Get python 2.x binary for hook_process (fixes problem
+#                when python 3.x is default python version, requires
+#                WeeChat >= 0.3.4)
 
 import re
 import weechat
@@ -27,8 +38,15 @@ SCRIPT_DESC    = "Shorten long incoming and outgoing URLs"
 ISGD = 'http://is.gd/api.php?%s'
 TINYURL = 'http://tinyurl.com/api-create.php?%s'
 
+# script options
+# shortener options:
+#  - isgd
+#  - tinyurl
+
 settings = {
+    "urllength": "30",
     "shortener": "isgd",
+    "ignore_list": "http://is.gd,http://tinyurl.com",
 }
 
 octet = r'(?:2(?:[0-4]\d|5[0-5])|1\d\d|\d{1,2})'
@@ -52,8 +70,9 @@ if weechat.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE,
 def short_all_url(data, modifier, modifier_data, string):
     new_message = string
     for url in urlRe.findall(string):
-        short_url = tiny_url(url, None)
-        new_message = new_message.replace(url, short_url)
+        if len(url) > int(weechat.config_get_plugin('urllength')) and not ignore_url(url):
+            short_url = tiny_url(url, None)
+            new_message = new_message.replace(url, short_url)
 
     return new_message
 
@@ -67,3 +86,12 @@ def tiny_url(url, buffer):
         return urlopen(url).read()
     except:
         return  url
+
+def ignore_url(url):
+  ignorelist = weechat.config_get_plugin('ignore_list').split(',')
+
+  for ignore in ignorelist:
+      if len(ignore) > 0 and ignore in url:
+          return True
+
+  return False
