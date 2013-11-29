@@ -29,7 +29,7 @@ import weechat
 from urllib import urlencode
 from urllib2 import urlopen
 
-SCRIPT_NAME    = "scl_shortenurl"
+SCRIPT_NAME    = "shorten_url"
 SCRIPT_AUTHOR  = "Steeve Chailloux <steevechailloux@gmail.com>"
 SCRIPT_VERSION = "0.4.1"
 SCRIPT_LICENSE = "GPL3"
