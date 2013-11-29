@@ -1,4 +1,6 @@
-# Copyright (c) 2010 by John Anderson <sontek@gmail.com>
+# Copyright (c) 2013 by Steeve Chailloux <steevechailloux@gmail.com>
+#
+# inspired by http://www.weechat.org/scripts/source/shortenurl.py.html/
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,17 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# History
-# 2011-10-24, Dmitry Geurkov <dmitry_627@mail.ru>
-#   version 0.4.1: added: option "ignore_list" for a blacklist of shorten urls.
-# 2011-01-17, nils_2 <weechatter@arcor.de>
-#   version 0.4: URI will be shorten in /query, too.
-#              : added: option "short_own".
-# 2010-11-08, John Anderson <sontek@gmail.com>:
-#   version 0.3: Get python 2.x binary for hook_process (fixes problem
-#                when python 3.x is default python version, requires
-#                WeeChat >= 0.3.4)
-
 import re
 import weechat
 from urllib import urlencode
@@ -37,11 +28,6 @@ SCRIPT_DESC    = "Shorten long incoming and outgoing URLs"
 
 ISGD = 'http://is.gd/api.php?%s'
 TINYURL = 'http://tinyurl.com/api-create.php?%s'
-
-# script options
-# shortener options:
-#  - isgd
-#  - tinyurl
 
 settings = {
     "color": "red",
@@ -65,13 +51,13 @@ if weechat.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE,
         if weechat.config_get_plugin(option) == "":
             weechat.config_set_plugin(option, default_value)
 
-    weechat.hook_modifier("weechat_print", "inside_hook", "")
-    weechat.hook_modifier("irc_out_privmsg", "outside_hook", "")
+    weechat.hook_modifier("weechat_print", "incoming_hook", "")
+    weechat.hook_modifier("irc_out_privmsg", "outgoing_hook", "")
 
-def inside_hook(data, modifier, modifier_data, string):
+def incoming_hook(data, modifier, modifier_data, string):
     return short_all_url(string, True)
 
-def outside_hook(data, modifier, modifier_data, string):
+def outgoing_hook(data, modifier, modifier_data, string):
     return short_all_url(string, False)
 
 def short_all_url(string, use_color):
