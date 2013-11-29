@@ -71,7 +71,7 @@ def short_all_url(data, modifier, modifier_data, string):
     new_message = string
     for url in urlRe.findall(string):
         if len(url) > int(weechat.config_get_plugin('urllength')) and not ignore_url(url):
-            short_url = tiny_url(url, None)
+            short_url = tiny_url(url)
             new_message = new_message.replace(url, short_url)
 
     return new_message
