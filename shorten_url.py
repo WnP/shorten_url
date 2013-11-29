@@ -29,7 +29,7 @@ import weechat
 from urllib import urlencode
 from urllib2 import urlopen
 
-SCRIPT_NAME    = "shorten_url"
+SCRIPT_NAME    = "scl_shortenurl"
 SCRIPT_AUTHOR  = "Steeve Chailloux <steevechailloux@gmail.com>"
 SCRIPT_VERSION = "0.4.1"
 SCRIPT_LICENSE = "GPL3"
@@ -44,6 +44,7 @@ TINYURL = 'http://tinyurl.com/api-create.php?%s'
 #  - tinyurl
 
 settings = {
+    "color": "red",
     "urllength": "30",
     "shortener": "isgd",
     "ignore_list": "http://is.gd,http://tinyurl.com",
@@ -64,15 +65,26 @@ if weechat.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE,
         if weechat.config_get_plugin(option) == "":
             weechat.config_set_plugin(option, default_value)
 
-    weechat.hook_modifier("weechat_print", "short_all_url", "")
-    weechat.hook_modifier("irc_out_privmsg", "short_all_url", "")
+    weechat.hook_modifier("weechat_print", "inside_hook", "")
+    weechat.hook_modifier("irc_out_privmsg", "outside_hook", "")
 
-def short_all_url(data, modifier, modifier_data, string):
+def inside_hook(data, modifier, modifier_data, string):
+    return short_all_url(string, True)
+
+def outside_hook(data, modifier, modifier_data, string):
+    return short_all_url(string, False)
+
+def short_all_url(string, color):
     new_message = string
     for url in urlRe.findall(string):
         if len(url) > int(weechat.config_get_plugin('urllength')) and not ignore_url(url):
             short_url = tiny_url(url)
-            new_message = new_message.replace(url, short_url)
+            if color:
+                color = weechat.color(weechat.config_get_plugin("color"))
+                reset = weechat.color('reset')
+                new_message = new_message.replace(url, '%s%s%s' % (color, short_url, reset))
+            else:
+                new_message = new_message.replace(url, short_url)
 
     return new_message
 
